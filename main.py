@@ -1,9 +1,9 @@
-from app.agents.script_analyzer import ScriptAnalyzer
-from app.agents.video_planner import VideoPlanner
+from app.agents.orchestrator import AgentOrchestrator
 from app.core.person_profile import PersonProfile, MovementProfile
 
 
 script = "A presenter explains why planning is important."
+
 
 person = PersonProfile(
     person_id="person_001",
@@ -17,17 +17,18 @@ person = PersonProfile(
     expression_style="confident and informative",
 )
 
-analyzer = ScriptAnalyzer()
-analysis = analyzer.analyze(script)
 
-planner = VideoPlanner()
-plan = planner.create_plan(analysis, person)
+orchestrator = AgentOrchestrator()
 
-print("SCRIPT ANALYSIS")
-print(analysis)
+video_plan = orchestrator.create_video_plan(
+    script=script,
+    person=person,
+)
 
+
+print("AI DIGITAL HUMAN AGENT")
 print("\nPERSON PROFILE")
 print(person)
 
 print("\nVIDEO PLAN")
-print(plan)
+print(video_plan)
