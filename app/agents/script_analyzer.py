@@ -23,26 +23,31 @@ class ScriptAnalysis(BaseModel):
 
 
 class ScriptAnalyzer:
-    """Analyzes a script and prepares it for video planning."""
+    """Analyzes a script and prepares structured data for video planning."""
 
     def analyze(self, script: str) -> ScriptAnalysis:
+        script = script.strip()
+
+        if not script:
+            raise ValueError("Script cannot be empty.")
+
         return ScriptAnalysis(
             script=script,
             scenes=[
                 Scene(
                     scene_number=1,
-                    description="Presenter explains why planning is important."
+                    description="Presenter explains the main message."
                 )
             ],
             shots=[
                 Shot(
                     shot_number=1,
                     scene_number=1,
-                    description="Presenter speaking directly to camera.",
-                    camera="Medium shot, eye-level"
+                    description="Presenter speaks directly to camera.",
+                    camera="Static, eye-level, medium shot"
                 )
             ],
             dialogue=[script],
             expressions=["Confident, informative"],
-            gestures=["Natural hand gestures while explaining"],
+            gestures=["Natural explanatory gestures"],
         )
