@@ -17,6 +17,8 @@ class Shot(BaseModel):
     scene_number: int
     description: str
     camera: str
+    framing: str
+    duration_seconds: float
 
 
 class ScriptAnalysis(BaseModel):
@@ -47,11 +49,13 @@ class ScriptAnalyzer:
             ],
             shots=[
                 Shot(
-                    shot_number=1,
-                    scene_number=1,
-                    description="Presenter speaks directly to camera.",
-                    camera="Static, eye-level, medium shot"
-                )
+    shot_number=1,
+    scene_number=1,
+    description="Presenter speaks directly to camera.",
+    camera="Static, eye-level",
+    framing="Medium shot",
+    duration_seconds=5.0
+)
             ],
             dialogue=[script],
             expressions=["Confident, informative"],
