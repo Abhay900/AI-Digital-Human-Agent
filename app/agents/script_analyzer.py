@@ -14,15 +14,15 @@ class Shot(BaseModel):
     camera: str
     framing: str
     duration_seconds: float
+    dialogue: str
+    expression: str
+    gesture: str
 
 
 class ScriptAnalysis(BaseModel):
     script: str
     scenes: list[Scene]
     shots: list[Shot]
-    dialogue: list[str]
-    expressions: list[str]
-    gestures: list[str]
 
 
 class ScriptAnalyzer:
@@ -35,12 +35,13 @@ class ScriptAnalyzer:
         return f"""
 You are an AI video production planner.
 
-Analyze the following script and convert it into a structured video plan.
+Analyze the following script and create a structured digital human
+video plan.
 
-For every scene and shot, determine:
+For every shot determine:
 - Scene description
 - Shot description
-- Camera movement or camera type
+- Camera type or movement
 - Framing
 - Duration in seconds
 - Exact dialogue
@@ -50,11 +51,13 @@ For every scene and shot, determine:
 Rules:
 1. Do not rewrite or change the meaning of the script.
 2. Keep dialogue faithful to the original script.
-3. Create logical scenes and shots based on the content.
-4. Use realistic camera directions.
-5. Expressions and gestures must match the dialogue.
-6. Avoid repetitive gestures.
-7. Keep the plan suitable for a digital human video agent.
+3. Divide the script into logical scenes and shots.
+4. Match expressions and gestures to the spoken dialogue.
+5. Avoid repetitive gestures.
+6. Use realistic camera directions.
+7. Keep the plan suitable for a digital human video.
+8. Every shot must contain its own dialogue, expression and gesture.
+9. Return only valid JSON matching the required schema.
 
 SCRIPT:
 {script}
@@ -93,10 +96,10 @@ SCRIPT:
                     description="Presenter speaks directly to camera.",
                     camera="Static, eye-level",
                     framing="Medium shot",
-                    duration_seconds=5.0
+                    duration_seconds=5.0,
+                    dialogue=script,
+                    expression="Confident, informative",
+                    gesture="Natural explanatory gestures"
                 )
-            ],
-            dialogue=[script],
-            expressions=["Confident, informative"],
-            gestures=["Natural explanatory gestures"],
+            ]
         )
