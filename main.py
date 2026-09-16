@@ -1,4 +1,10 @@
-from app.core.config import APP_NAME, ENVIRONMENT
+from app.agents.script_analyzer import ScriptAnalyzer
 
-print(f"{APP_NAME} - System Online")
-print(f"Environment: {ENVIRONMENT}")
+
+analyzer = ScriptAnalyzer()
+
+result = analyzer.analyze(
+    "A presenter explains why planning is important."
+)
+
+print(result)
