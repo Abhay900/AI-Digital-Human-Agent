@@ -1,5 +1,11 @@
 from pydantic import BaseModel
+from app.services.llm_service import LLMService
 
+class ScriptAnalyzer:
+    """Analyzes a script and prepares structured data for video planning."""
+
+    def __init__(self, llm_service: LLMService | None = None):
+        self.llm_service = llm_service or LLMService()
 
 class Scene(BaseModel):
     scene_number: int
