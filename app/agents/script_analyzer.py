@@ -60,6 +60,18 @@ SCRIPT:
 {script}
 """.strip()
 
+    def parse_response(self, response: str) -> ScriptAnalysis:
+        """Convert an AI response into a validated ScriptAnalysis object."""
+
+        import json
+
+        try:
+            data = json.loads(response)
+        except json.JSONDecodeError as exc:
+            raise ValueError("AI response is not valid JSON.") from exc
+
+        return ScriptAnalysis.model_validate(data)
+
     def analyze(self, script: str) -> ScriptAnalysis:
         script = script.strip()
 
