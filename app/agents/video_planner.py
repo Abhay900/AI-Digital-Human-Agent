@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from app.core.person_profile import PersonProfile
 
 
 class VideoShot(BaseModel):
@@ -19,7 +20,11 @@ class VideoPlan(BaseModel):
 class VideoPlanner:
     """Converts script analysis into a video production plan."""
 
-    def create_plan(self, analysis) -> VideoPlan:
+    def create_plan(
+        self,
+        analysis,
+        person: PersonProfile,
+    ) -> VideoPlan:
         return VideoPlan(
             shots=[
                 VideoShot(
@@ -28,8 +33,13 @@ class VideoPlanner:
                     duration_seconds=5.0,
                     camera="Static",
                     framing="Medium shot",
-                    expression="Confident, informative",
-                    gesture="Person-specific natural gesture",
+                    expression=person.expression_style,
+                    gesture=(
+                        f"{person.movement.gesture_style}; "
+                        f"{person.movement.hand_movement_style}; "
+                        f"{person.movement.body_movement_style}; "
+                        f"speed: {person.movement.movement_speed}"
+                    ),
                     dialogue=analysis.script,
                 )
             ]
