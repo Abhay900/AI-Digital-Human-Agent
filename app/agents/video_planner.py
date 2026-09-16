@@ -18,29 +18,36 @@ class VideoPlan(BaseModel):
 
 
 class VideoPlanner:
-    """Converts script analysis into a video production plan."""
+    """Converts script analysis into a digital human video plan."""
 
     def create_plan(
         self,
         analysis,
         person: PersonProfile,
     ) -> VideoPlan:
-        return VideoPlan(
-            shots=[
+
+        video_shots = []
+
+        for shot in analysis.shots:
+            gesture = (
+                f"{shot.gesture}; "
+                f"Person style: {person.movement.gesture_style}; "
+                f"Hand movement: {person.movement.hand_movement_style}; "
+                f"Body movement: {person.movement.body_movement_style}; "
+                f"Movement speed: {person.movement.movement_speed}"
+            )
+
+            video_shots.append(
                 VideoShot(
-                    shot_number=1,
-                    scene_number=1,
-                    duration_seconds=5.0,
-                    camera="Static",
-                    framing="Medium shot",
-                    expression=person.expression_style,
-                    gesture=(
-                        f"{person.movement.gesture_style}; "
-                        f"{person.movement.hand_movement_style}; "
-                        f"{person.movement.body_movement_style}; "
-                        f"speed: {person.movement.movement_speed}"
-                    ),
-                    dialogue=analysis.script,
+                    shot_number=shot.shot_number,
+                    scene_number=shot.scene_number,
+                    duration_seconds=shot.duration_seconds,
+                    camera=shot.camera,
+                    framing=shot.framing,
+                    expression=shot.expression,
+                    gesture=gesture,
+                    dialogue=shot.dialogue,
                 )
-            ]
-        )
+            )
+
+        return VideoPlan(shots=video_shots)
