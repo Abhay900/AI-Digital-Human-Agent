@@ -1,7 +1,6 @@
 from app.agents.script_analyzer import ScriptAnalyzer
-from app.agents.video_planner import VideoPlanner
+from app.agents.video_planner import VideoPlan, VideoPlanner
 from app.core.person_profile import PersonProfile
-from app.agents.video_planner import VideoPlan
 
 
 class AgentOrchestrator:
@@ -20,9 +19,12 @@ class AgentOrchestrator:
         script: str,
         person: PersonProfile,
     ) -> VideoPlan:
-        """Analyze the script and create a person-aware video plan."""
+        """Analyze the script with the person profile and create a video plan."""
 
-        analysis = self.script_analyzer.analyze(script)
+        analysis = self.script_analyzer.analyze(
+            script=script,
+            person=person,
+        )
 
         return self.video_planner.create_plan(
             analysis=analysis,

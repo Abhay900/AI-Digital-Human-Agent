@@ -1,4 +1,8 @@
+import json
+
 from pydantic import BaseModel
+
+from app.core.person_profile import PersonProfile
 from app.services.llm_service import LLMService
 
 
@@ -26,12 +30,42 @@ class ScriptAnalysis(BaseModel):
 
 
 class ScriptAnalyzer:
-    """Analyzes a script and prepares structured data for video planning."""
+    """Analyzes a script using the person's digital-human profile."""
 
-    def __init__(self, llm_service: LLMService | None = None):
+    def __init__(
+        self,
+        llm_service: LLMService | None = None,
+        use_mock: bool = True,
+    ):
         self.llm_service = llm_service or LLMService()
+        self.use_mock = use_mock
 
-    def build_prompt(self, script: str) -> str:
+    def build_prompt(
+        self,
+        script: str,
+        person: PersonProfile | None = None,
+    ) -> str:
+
+        person_context = ""
+
+        if person:
+            movement = person.movement
+
+            person_context = f"""
+AUTHORIZED PERSON MOVEMENT PROFILE:
+- Gesture style: {movement.gesture_style}
+- Hand movement: {movement.hand_movement_style}
+- Body movement: {movement.body_movement_style}
+- Movement speed: {movement.movement_speed}
+- Gesture frequency: {movement.gesture_frequency}
+- Posture: {movement.posture_style}
+- Head movement: {movement.head_movement_style}
+- Eye movement: {movement.eye_movement_style}
+- Preferred gestures: {", ".join(movement.preferred_gestures) or "None specified"}
+- Avoided gestures: {", ".join(movement.avoided_gestures) or "None specified"}
+- Movement notes: {movement.movement_notes or "None"}
+"""
+
         return f"""
 You are an AI video production planner.
 
@@ -48,16 +82,26 @@ For every shot determine:
 - Facial expression
 - Gesture and body movement
 
-Rules:
+PERSON-SPECIFIC RULES:
+1. Treat the authorized person's movement profile as a constraint.
+2. Prefer the person's natural movement characteristics.
+3. Use preferred gestures when appropriate.
+4. Avoid gestures listed as avoided gestures.
+5. Do not invent exaggerated or unnatural movements.
+6. Match gestures and expressions to the dialogue.
+7. Keep movements realistic and purposeful.
+
+{person_context}
+
+GENERAL RULES:
 1. Do not rewrite or change the meaning of the script.
 2. Keep dialogue faithful to the original script.
 3. Divide the script into logical scenes and shots.
-4. Match expressions and gestures to the spoken dialogue.
-5. Avoid repetitive gestures.
-6. Use realistic camera directions.
-7. Keep the plan suitable for a digital human video.
-8. Every shot must contain its own dialogue, expression and gesture.
-9. Return only valid JSON matching the required schema.
+4. Avoid repetitive gestures.
+5. Use realistic camera directions.
+6. Keep the plan suitable for a digital human video.
+7. Every shot must contain its own dialogue, expression and gesture.
+8. Return only valid JSON matching the required schema.
 
 SCRIPT:
 {script}
@@ -66,8 +110,6 @@ SCRIPT:
     def parse_response(self, response: str) -> ScriptAnalysis:
         """Convert an AI response into a validated ScriptAnalysis object."""
 
-        import json
-
         try:
             data = json.loads(response)
         except json.JSONDecodeError as exc:
@@ -75,18 +117,49 @@ SCRIPT:
 
         return ScriptAnalysis.model_validate(data)
 
-    def analyze(self, script: str) -> ScriptAnalysis:
+    def analyze(
+        self,
+        script: str,
+        person: PersonProfile | None = None,
+    ) -> ScriptAnalysis:
+
         script = script.strip()
 
         if not script:
             raise ValueError("Script cannot be empty.")
+
+        if self.use_mock:
+            return self._mock_analysis(script, person)
+
+        prompt = self.build_prompt(
+            script=script,
+            person=person,
+        )
+
+        response = self.llm_service.generate(prompt)
+
+        return self.parse_response(response)
+
+    def _mock_analysis(
+        self,
+        script: str,
+        person: PersonProfile | None = None,
+    ) -> ScriptAnalysis:
+
+        gesture = "Natural explanatory gestures"
+
+        if person:
+            gesture = (
+                f"Use {person.movement.gesture_style} gestures "
+                f"with {person.movement.hand_movement_style}."
+            )
 
         return ScriptAnalysis(
             script=script,
             scenes=[
                 Scene(
                     scene_number=1,
-                    description="Presenter explains the main message."
+                    description="Presenter introduces the main message.",
                 )
             ],
             shots=[
@@ -98,8 +171,8 @@ SCRIPT:
                     framing="Medium shot",
                     duration_seconds=5.0,
                     dialogue=script,
-                    expression="Confident, informative",
-                    gesture="Natural explanatory gestures"
+                    expression="Confident and informative",
+                    gesture=gesture,
                 )
-            ]
+            ],
         )
