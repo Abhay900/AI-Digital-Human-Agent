@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+
+from app.agents.movement_instruction_builder import MovementInstructionBuilder
 from app.core.person_profile import PersonProfile
 
 
@@ -18,7 +20,15 @@ class VideoPlan(BaseModel):
 
 
 class VideoPlanner:
-    """Converts script analysis into a digital human video plan."""
+    """Converts script analysis into a person-aware digital human video plan."""
+
+    def __init__(
+        self,
+        movement_builder: MovementInstructionBuilder | None = None,
+    ):
+        self.movement_builder = (
+            movement_builder or MovementInstructionBuilder()
+        )
 
     def create_plan(
         self,
@@ -26,15 +36,14 @@ class VideoPlanner:
         person: PersonProfile,
     ) -> VideoPlan:
 
+        movement_instructions = self.movement_builder.build(person)
+
         video_shots = []
 
         for shot in analysis.shots:
             gesture = (
-                f"{shot.gesture}; "
-                f"Person style: {person.movement.gesture_style}; "
-                f"Hand movement: {person.movement.hand_movement_style}; "
-                f"Body movement: {person.movement.body_movement_style}; "
-                f"Movement speed: {person.movement.movement_speed}"
+                f"Shot gesture: {shot.gesture}. "
+                f"{movement_instructions}"
             )
 
             video_shots.append(
